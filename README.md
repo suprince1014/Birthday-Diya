@@ -43,11 +43,11 @@ Ready for 1-click deployment on **GitHub Pages**, **Netlify**, or **Vercel**!
 
 ## 📂 Asset Map
 
-- **Hero Portrait**: `assets/diya-hero.jpg`
-- **Navratri Looks (1 to 9)**: `assets/nav1.jpg` through `assets/nav9.jpg`
+- **Hero Portrait**: `assets/diya-hero.webp`
+- **Navratri Looks (1 to 9)**: `assets/nav1.webp` through `assets/nav9.webp`
 - **Memory Scrapbook**:
-  - Photos: `assets/child1.jpg` to `assets/child14.jpg`
-  - Video clips: `assets/video1.mp4` to `assets/video7.mp4` (encoded in universal H.264 for mobile compatibility)
+  - Photos: `assets/child1.webp` to `assets/child14.webp` (ultra-light WebP format)
+  - Video clips: `assets/video1.webm` to `assets/video7.webm` (optimized VP9 WebM for rapid loading)
 - **Soundtrack Video**: `assets/Ramo-Re.mp4` (*Mara Tame Su Thav Cho*)
 
 ---
