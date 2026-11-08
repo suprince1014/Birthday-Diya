@@ -335,21 +335,21 @@ html, body {
 /* The Letter Card inside the envelope - 100% crisp, no blur, high-DPI text */
 .letter-preview {
   position: absolute;
-  top: 15px;
-  left: 14px;
-  right: 14px;
-  height: 165px;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  height: 175px;
   background: #ffffff;
   background: linear-gradient(150deg, #ffffff 0%, #fff7fb 60%, #ffedf6 100%);
   color: #1a102a;
   border-radius: 12px;
-  padding: 16px 14px;
+  padding: 14px 12px;
   z-index: 2;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   border: 1.5px solid rgba(255, 42, 133, 0.35);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   text-align: center;
   cursor: pointer;
@@ -370,25 +370,27 @@ html, body {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #ff2a85;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
 }
 
 .preview-title {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 800;
   color: #160c26;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
 }
 
 .preview-text {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #3d354a;
   font-weight: 500;
   line-height: 1.45;
-  max-width: 95%;
+  max-width: 98%;
   -webkit-font-smoothing: antialiased;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .preview-footer {
@@ -396,8 +398,8 @@ html, body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-top: 8px;
-  padding-top: 6px;
+  margin-top: 6px;
+  padding-top: 5px;
   border-top: 1px dashed rgba(255, 42, 133, 0.25);
 }
 
@@ -683,8 +685,9 @@ html, body {
 .letter-stack-wrapper {
   position: relative;
   width: 100%;
-  max-width: 380px;
-  height: 420px;
+  max-width: 390px;
+  height: 480px;
+  max-height: 64vh;
   margin-top: 6px;
   perspective: 1200px;
 }
@@ -701,15 +704,16 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(22, 12, 36, 0.88);
+  background: linear-gradient(160deg, rgba(28, 15, 46, 0.94) 0%, rgba(16, 9, 28, 0.98) 100%);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 42, 133, 0.28);
   border-radius: var(--card-radius);
-  padding: 24px 22px;
+  padding: 18px 18px 14px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.15);
   transition: transform 0.5s var(--transition-smooth), opacity 0.5s var(--transition-smooth);
   touch-action: pan-y;
   cursor: grab;
@@ -733,7 +737,8 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .letter-stamp {
@@ -755,45 +760,104 @@ html, body {
 }
 
 .letter-greeting {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: #fff;
   letter-spacing: -0.01em;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+/* Scrollable body so 100% of the letter is readable on every phone */
+.letter-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 6px;
+  margin-bottom: 8px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 42, 133, 0.6) rgba(255, 255, 255, 0.05);
+}
+
+.letter-scroll-area::-webkit-scrollbar {
+  width: 5px;
+}
+.letter-scroll-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.letter-scroll-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff2a85, #ff5ca1);
+  border-radius: 4px;
 }
 
 .letter-body {
-  font-size: 0.88rem;
-  line-height: 1.6;
-  color: #e2e8f0;
-  margin-bottom: 8px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: #e2d9f3;
+  margin-bottom: 10px;
   font-weight: 400;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .letter-signoff {
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .swipe-hint-pill {
-  font-size: 0.75rem;
-  color: #ff5ca1;
+  font-size: 0.72rem;
+  color: #ff7eb3;
   font-weight: 600;
 }
 
+.signature-block {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
 .signature-tag {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 
 .signature-name {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #fff;
+}
+
+.letter-next-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(255, 42, 133, 0.16);
+  border: 1px solid rgba(255, 42, 133, 0.4);
+  border-radius: 14px;
+  color: #ff7eb3;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.letter-next-btn:active {
+  background: rgba(255, 42, 133, 0.35);
+  transform: scale(0.96);
+}
+
+.letter-next-btn svg {
+  width: 12px;
+  height: 12px;
 }
 
 /* Stack Stacking States */
@@ -1871,4 +1935,142 @@ html, body {
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 10px;
+}
+
+/* ==========================================================
+   Mobile & Small Screen Optimizations
+   Ensures 100% of letter text, greetings, and cards are
+   fully visible and smoothly readable on every phone
+   ========================================================== */
+@media (max-width: 600px) {
+  .slide {
+    padding: 12px 14px;
+  }
+
+  .slide-content {
+    gap: 10px;
+  }
+
+  .section-header {
+    margin-bottom: 2px;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+    line-height: 1.15;
+  }
+
+  .section-sub {
+    font-size: 0.76rem;
+  }
+
+  .letter-stack-wrapper {
+    height: 500px;
+    max-height: calc(100dvh - 160px);
+    max-width: 100%;
+  }
+
+  .letter-card {
+    padding: 16px 14px 12px;
+  }
+
+  .letter-greeting {
+    font-size: 1.18rem;
+    margin-bottom: 6px;
+  }
+
+  .letter-scroll-area {
+    padding-right: 6px;
+    margin-bottom: 6px;
+  }
+
+  .letter-body {
+    font-size: 0.82rem;
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+  .letter-signoff {
+    padding-top: 6px;
+  }
+
+  .swipe-hint-pill {
+    font-size: 0.68rem;
+  }
+
+  .letter-next-btn {
+    padding: 5px 11px;
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-height: 720px) {
+  .section-title {
+    font-size: 1.45rem;
+  }
+
+  .sub-heading {
+    font-size: 0.66rem;
+  }
+
+  .section-sub {
+    display: none;
+  }
+
+  .letter-stack-wrapper {
+    height: 460px;
+    max-height: calc(100dvh - 130px);
+  }
+
+  .letter-card {
+    padding: 12px 12px 10px;
+  }
+
+  .letter-greeting {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  .letter-body {
+    font-size: 0.8rem;
+    line-height: 1.48;
+    margin-bottom: 6px;
+  }
+}
+
+@media (max-width: 380px) {
+  .envelope-wrapper {
+    width: 275px;
+    height: 185px;
+  }
+
+  .letter-preview {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    height: 170px;
+    padding: 10px 8px;
+  }
+
+  .preview-title {
+    font-size: 0.95rem;
+  }
+
+  .preview-text {
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .preview-footer {
+    margin-top: 4px;
+    padding-top: 4px;
+  }
+
+  .preview-sub {
+    font-size: 0.68rem;
+  }
+
+  .preview-tap-hint {
+    font-size: 0.6rem;
+  }
 }

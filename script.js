@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==========================================================
-     3. Slide 2: Stackable 3-Page Letter (Swipe Gestures)
+     3. Slide 2: Stackable 3-Page Letter (Swipe Gestures & Reading)
      ========================================================== */
   const letterCards = Array.from(document.querySelectorAll('.letter-card'));
   const letterDots = Array.from(document.querySelectorAll('.letter-pagination .dot'));
@@ -222,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let letterStartY = 0;
   let letterCurrentX = 0;
   let isLetterDragging = false;
+  let letterGestureDirection = null; // 'horizontal' | 'vertical' | null
 
   function updateLetterStack(newIndex) {
     currentLetterPage = (newIndex + letterCards.length) % letterCards.length;
@@ -237,6 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (relativeIndex === 0) {
         card.classList.add('active-card');
+        // Reset scroll position to top when card becomes active so each page starts at top
+        const scrollArea = card.querySelector('.letter-scroll-area');
+        if (scrollArea) scrollArea.scrollTop = 0;
       } else if (relativeIndex === 1) {
         card.classList.add('card-behind-1');
       } else {
@@ -256,49 +260,73 @@ document.addEventListener('DOMContentLoaded', () => {
     stackWrapper.addEventListener('touchstart', (e) => {
       const activeCard = stackWrapper.querySelector('.letter-card.active-card');
       if (!activeCard) return;
-      isLetterDragging = true;
+
       letterStartX = e.touches[0].clientX;
       letterStartY = e.touches[0].clientY;
       letterCurrentX = letterStartX;
-      activeCard.style.transition = 'none';
+      isLetterDragging = false;
+      letterGestureDirection = null;
     }, { passive: true });
 
     stackWrapper.addEventListener('touchmove', (e) => {
-      if (!isLetterDragging) return;
       const activeCard = stackWrapper.querySelector('.letter-card.active-card');
       if (!activeCard) return;
 
-      letterCurrentX = e.touches[0].clientX;
-      const diffX = letterCurrentX - letterStartX;
-      const diffY = e.touches[0].clientY - letterStartY;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const diffX = currentX - letterStartX;
+      const diffY = currentY - letterStartY;
 
-      // Rotate with drag
-      const rotate = diffX * 0.08;
-      activeCard.style.transform = `translate3d(${diffX}px, ${diffY * 0.25}px, 0) rotate(${rotate}deg)`;
+      // Determine intent after small threshold
+      if (!letterGestureDirection) {
+        if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
+          if (Math.abs(diffX) > Math.abs(diffY)) {
+            // Horizontal swipe: user wants to flip card
+            letterGestureDirection = 'horizontal';
+            isLetterDragging = true;
+            activeCard.style.transition = 'none';
+          } else {
+            // Vertical scroll: user is scrolling inside the letter content
+            letterGestureDirection = 'vertical';
+            isLetterDragging = false;
+          }
+        }
+      }
+
+      // Only drag horizontally if this was a horizontal swipe gesture
+      if (letterGestureDirection === 'horizontal' && isLetterDragging) {
+        letterCurrentX = currentX;
+        const rotate = diffX * 0.08;
+        activeCard.style.transform = `translate3d(${diffX}px, 0, 0) rotate(${rotate}deg)`;
+      }
     }, { passive: true });
 
     stackWrapper.addEventListener('touchend', () => {
-      if (!isLetterDragging) return;
-      isLetterDragging = false;
       const activeCard = stackWrapper.querySelector('.letter-card.active-card');
       if (!activeCard) return;
 
-      const diffX = letterCurrentX - letterStartX;
+      if (letterGestureDirection === 'horizontal' && isLetterDragging) {
+        isLetterDragging = false;
+        const diffX = letterCurrentX - letterStartX;
 
-      if (Math.abs(diffX) > 60) {
-        // Fly card out
-        activeCard.style.transition = 'transform 0.35s ease-out, opacity 0.35s ease-out';
-        activeCard.style.transform = `translate3d(${diffX > 0 ? 120 : -120}%, 0, 0) rotate(${diffX > 0 ? 15 : -15}deg)`;
-        activeCard.style.opacity = '0';
+        if (Math.abs(diffX) > 55) {
+          // Fly card out smoothly
+          activeCard.style.transition = 'transform 0.35s ease-out, opacity 0.35s ease-out';
+          activeCard.style.transform = `translate3d(${diffX > 0 ? 120 : -120}%, 0, 0) rotate(${diffX > 0 ? 15 : -15}deg)`;
+          activeCard.style.opacity = '0';
 
-        setTimeout(() => {
-          updateLetterStack(currentLetterPage + 1);
-        }, 300);
-      } else {
-        // Snap back
-        activeCard.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-        activeCard.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(0deg)';
+          setTimeout(() => {
+            updateLetterStack(currentLetterPage + 1);
+          }, 280);
+        } else {
+          // Snap back
+          activeCard.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          activeCard.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(0deg)';
+        }
       }
+
+      isLetterDragging = false;
+      letterGestureDirection = null;
     });
 
     // Pagination Dots click
@@ -308,12 +336,21 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Tapping on the active card also advances
-    letterCards.forEach((card) => {
-      card.addEventListener('click', (e) => {
-        if (card.classList.contains('active-card') && Math.abs(letterCurrentX - letterStartX) < 10) {
-          updateLetterStack(currentLetterPage + 1);
-        }
+    // Explicit Next Page buttons inside each card footer
+    const letterNextBtns = stackWrapper.querySelectorAll('.letter-next-btn');
+    letterNextBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateLetterStack(currentLetterPage + 1);
+      });
+    });
+
+    // Optional tap on the top metadata header or hint to flip card
+    const topMetas = stackWrapper.querySelectorAll('.letter-top-meta, .swipe-hint-pill');
+    topMetas.forEach((meta) => {
+      meta.addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateLetterStack(currentLetterPage + 1);
       });
     });
   }
