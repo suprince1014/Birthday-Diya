@@ -555,51 +555,183 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==========================================================
-     7. Slide 6: Interactive Canvas Scratch Card
+     7. Slide 6: Interactive Canvas Scratch Card & Mystery Teaser
      ========================================================== */
+  const mysteryTeaser = document.getElementById('mysteryTeaser');
+  const unlockVoucherBtn = document.getElementById('unlockVoucherBtn');
+  const scratchCardBox = document.getElementById('scratchCardBox');
   const scratchCanvas = document.getElementById('scratchCanvas');
+  const scratchStatus = document.getElementById('scratchStatus');
   const scratchPercentText = document.getElementById('scratchPercentText');
   const resetScratchBtn = document.getElementById('resetScratchBtn');
+
   let scratchCtx = null;
   let isScratching = false;
+  let lastScratchX = null;
+  let lastScratchY = null;
+  let isCardRevealed = false;
+
+  function roundRect(ctx, x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
 
   function initScratchCard() {
-    if (!scratchCanvas) return;
+    if (!scratchCanvas || !scratchCardBox) return;
     scratchCtx = scratchCanvas.getContext('2d', { willReadFrequently: true });
-    
-    const rect = scratchCanvas.parentElement.getBoundingClientRect();
-    scratchCanvas.width = rect.width;
-    scratchCanvas.height = rect.height;
 
-    // Metallic gold cover
-    const grad = scratchCtx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
-    grad.addColorStop(0, '#f1c40f');
-    grad.addColorStop(0.3, '#d4af37');
-    grad.addColorStop(0.7, '#f39c12');
-    grad.addColorStop(1, '#ffd700');
-    
+    const rect = scratchCardBox.getBoundingClientRect();
+    const width = Math.round(rect.width) || 360;
+    const height = Math.round(rect.height) || 400;
+
+    scratchCanvas.width = width;
+    scratchCanvas.height = height;
+
+    // Reset styles
+    scratchCanvas.style.transition = 'none';
+    scratchCanvas.style.opacity = '1';
+    scratchCanvas.style.pointerEvents = 'auto';
+    scratchCtx.globalCompositeOperation = 'source-over';
+
+    // 1. Luxury Holographic Midnight-Rose-Gold Gradient
+    const grad = scratchCtx.createLinearGradient(0, 0, width, height);
+    grad.addColorStop(0, '#1c0f38');      // Royal obsidian violet
+    grad.addColorStop(0.25, '#48196b');   // Deep amethyst
+    grad.addColorStop(0.5, '#ff2a85');    // Neon electric pink
+    grad.addColorStop(0.75, '#ffd166');   // Liquid gold
+    grad.addColorStop(0.9, '#ff6b8b');    // Rose coral
+    grad.addColorStop(1, '#24103f');      // Deep obsidian
+
     scratchCtx.fillStyle = grad;
-    scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+    scratchCtx.fillRect(0, 0, width, height);
 
-    // Subtle stripes pattern
-    scratchCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    for (let i = -scratchCanvas.width; i < scratchCanvas.width * 2; i += 24) {
-      scratchCtx.fillRect(i, 0, 8, scratchCanvas.height);
+    // 2. Holographic Diagonal Shimmer Lines
+    scratchCtx.save();
+    scratchCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    scratchCtx.lineWidth = 1.5;
+    for (let x = -height; x < width + height; x += 18) {
+      scratchCtx.beginPath();
+      scratchCtx.moveTo(x, 0);
+      scratchCtx.lineTo(x + height, height);
+      scratchCtx.stroke();
     }
+    scratchCtx.restore();
 
-    scratchCtx.fillStyle = '#261b07';
-    scratchCtx.font = 'bold 15px sans-serif';
+    // 3. Stardust & Diamond Sparkles
+    const sparkles = [
+      { x: width * 0.15, y: height * 0.18, r: 2.5, a: 0.85 },
+      { x: width * 0.85, y: height * 0.22, r: 3, a: 0.9 },
+      { x: width * 0.12, y: height * 0.78, r: 2, a: 0.75 },
+      { x: width * 0.88, y: height * 0.72, r: 2.5, a: 0.85 },
+      { x: width * 0.28, y: height * 0.45, r: 1.8, a: 0.6 },
+      { x: width * 0.72, y: height * 0.52, r: 2.2, a: 0.75 },
+      { x: width * 0.5, y: height * 0.14, r: 3.5, a: 0.95 },
+      { x: width * 0.5, y: height * 0.86, r: 2.8, a: 0.9 },
+    ];
+    sparkles.forEach(s => {
+      scratchCtx.save();
+      scratchCtx.fillStyle = `rgba(255, 255, 255, ${s.a})`;
+      scratchCtx.beginPath();
+      scratchCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      scratchCtx.fill();
+      scratchCtx.strokeStyle = `rgba(255, 255, 255, ${s.a * 0.7})`;
+      scratchCtx.lineWidth = 1;
+      scratchCtx.beginPath();
+      scratchCtx.moveTo(s.x - s.r * 2.5, s.y);
+      scratchCtx.lineTo(s.x + s.r * 2.5, s.y);
+      scratchCtx.moveTo(s.x, s.y - s.r * 2.5);
+      scratchCtx.lineTo(s.x, s.y + s.r * 2.5);
+      scratchCtx.stroke();
+      scratchCtx.restore();
+    });
+
+    // 4. Elegant Double Inner Border
+    scratchCtx.save();
+    scratchCtx.strokeStyle = 'rgba(255, 215, 0, 0.45)';
+    scratchCtx.lineWidth = 1.5;
+    roundRect(scratchCtx, 12, 12, width - 24, height - 24, 16);
+    scratchCtx.stroke();
+
+    scratchCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    scratchCtx.lineWidth = 1;
+    roundRect(scratchCtx, 16, 16, width - 32, height - 32, 14);
+    scratchCtx.stroke();
+    scratchCtx.restore();
+
+    // 5. Center Badge: VIP TICKET
+    scratchCtx.save();
+    scratchCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    const badgeW = 170;
+    const badgeH = 28;
+    roundRect(scratchCtx, (width - badgeW) / 2, height / 2 - 58, badgeW, badgeH, 14);
+    scratchCtx.fill();
+    scratchCtx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+    scratchCtx.lineWidth = 1;
+    scratchCtx.stroke();
+
+    scratchCtx.fillStyle = '#ffd166';
+    scratchCtx.font = 'bold 11px system-ui, -apple-system, sans-serif';
     scratchCtx.textAlign = 'center';
     scratchCtx.textBaseline = 'middle';
-    scratchCtx.fillText('✨ SCRATCH HERE ✨', scratchCanvas.width / 2, scratchCanvas.height / 2 - 10);
-    
-    scratchCtx.font = '12px sans-serif';
-    scratchCtx.fillStyle = '#4a3b12';
-    scratchCtx.fillText('Rub with your finger', scratchCanvas.width / 2, scratchCanvas.height / 2 + 14);
+    scratchCtx.fillText('★ VIP MYSTERY TICKET ★', width / 2, height / 2 - 44);
+
+    // 6. Main Action Text
+    scratchCtx.fillStyle = '#ffffff';
+    scratchCtx.font = '800 20px system-ui, -apple-system, sans-serif';
+    scratchCtx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    scratchCtx.shadowBlur = 8;
+    scratchCtx.fillText('✨ RUB TO REVEAL ✨', width / 2, height / 2 - 6);
+
+    // 7. Subtitle Instruction
+    scratchCtx.shadowBlur = 0;
+    scratchCtx.fillStyle = '#ffb3d1';
+    scratchCtx.font = '600 12px system-ui, -apple-system, sans-serif';
+    scratchCtx.fillText('Scratch with your finger to unlock', width / 2, height / 2 + 22);
+
+    // 8. Bottom Security Stamp
+    scratchCtx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    scratchCtx.font = '10px system-ui, -apple-system, sans-serif';
+    scratchCtx.fillText('CONFIDENTIAL • FOR DIYA ONLY 🔒', width / 2, height - 28);
+    scratchCtx.restore();
 
     if (scratchPercentText) {
       scratchPercentText.textContent = '0% scratched';
     }
+  }
+
+  function unveilScratchCard() {
+    if (isCardRevealed) return;
+    isCardRevealed = true;
+
+    if (mysteryTeaser) {
+      mysteryTeaser.classList.add('teaser-hidden');
+    }
+
+    if (scratchCardBox) {
+      scratchCardBox.classList.remove('hidden-card');
+    }
+
+    if (scratchStatus) scratchStatus.classList.remove('hidden');
+    if (resetScratchBtn) resetScratchBtn.classList.remove('hidden');
+
+    if (window.lucide) window.lucide.createIcons();
+
+    // Initialize canvas now that scratchCardBox is visible and has layout
+    requestAnimationFrame(() => {
+      initScratchCard();
+      triggerPopperConfetti();
+    });
+  }
+
+  if (unlockVoucherBtn) {
+    unlockVoucherBtn.addEventListener('click', unveilScratchCard);
   }
 
   function getScratchCoords(e) {
@@ -617,9 +749,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const { x, y } = getScratchCoords(e);
 
     scratchCtx.globalCompositeOperation = 'destination-out';
+    scratchCtx.lineCap = 'round';
+    scratchCtx.lineJoin = 'round';
+    scratchCtx.lineWidth = 44;
+
     scratchCtx.beginPath();
-    scratchCtx.arc(x, y, 22, 0, Math.PI * 2);
-    scratchCtx.fill();
+    if (lastScratchX !== null && lastScratchY !== null) {
+      scratchCtx.moveTo(lastScratchX, lastScratchY);
+      scratchCtx.lineTo(x, y);
+      scratchCtx.stroke();
+    } else {
+      scratchCtx.arc(x, y, 22, 0, Math.PI * 2);
+      scratchCtx.fill();
+    }
+    lastScratchX = x;
+    lastScratchY = y;
 
     checkScratchProgress();
   }
@@ -627,7 +771,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let progressCheckThrottle = 0;
   function checkScratchProgress() {
     const now = Date.now();
-    if (now - progressCheckThrottle < 200) return;
+    if (now - progressCheckThrottle < 180) return;
     progressCheckThrottle = now;
 
     try {
@@ -642,7 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scratchPercentText.textContent = `${percentage}% scratched`;
       }
 
-      if (percentage > 50 && scratchCanvas.style.opacity !== '0') {
+      if (percentage > 45 && scratchCanvas.style.opacity !== '0') {
         scratchCanvas.style.transition = 'opacity 0.6s ease';
         scratchCanvas.style.opacity = '0';
         setTimeout(() => {
@@ -654,24 +798,44 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (scratchCanvas) {
-    scratchCanvas.addEventListener('mousedown', (e) => { isScratching = true; scratch(e); });
+    scratchCanvas.addEventListener('mousedown', (e) => {
+      isScratching = true;
+      lastScratchX = null;
+      lastScratchY = null;
+      scratch(e);
+    });
     scratchCanvas.addEventListener('mousemove', scratch);
-    window.addEventListener('mouseup', () => { isScratching = false; });
+    window.addEventListener('mouseup', () => {
+      isScratching = false;
+      lastScratchX = null;
+      lastScratchY = null;
+    });
 
-    scratchCanvas.addEventListener('touchstart', (e) => { isScratching = true; scratch(e); }, { passive: true });
-    scratchCanvas.addEventListener('touchmove', scratch, { passive: true });
-    window.addEventListener('touchend', () => { isScratching = false; });
+    scratchCanvas.addEventListener('touchstart', (e) => {
+      isScratching = true;
+      lastScratchX = null;
+      lastScratchY = null;
+      scratch(e);
+    }, { passive: false });
+
+    scratchCanvas.addEventListener('touchmove', (e) => {
+      if (isScratching) {
+        e.preventDefault();
+        scratch(e);
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+      isScratching = false;
+      lastScratchX = null;
+      lastScratchY = null;
+    });
 
     if (resetScratchBtn) {
       resetScratchBtn.addEventListener('click', () => {
-        scratchCanvas.style.transition = 'none';
-        scratchCanvas.style.opacity = '1';
-        scratchCanvas.style.pointerEvents = 'auto';
         initScratchCard();
       });
     }
-
-    setTimeout(initScratchCard, 350);
   }
 
   /* ==========================================================
