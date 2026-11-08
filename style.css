@@ -307,17 +307,17 @@ html, body {
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 42, 133, 0.2);
   transform-style: preserve-3d;
   transition: transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1), 
-              opacity 0.85s ease, 
-              filter 0.85s ease,
               box-shadow 0.85s ease;
 }
 
-/* When letter comes forward, envelope recedes into background */
-.envelope-wrapper.letter-forward .envelope {
-  transform: translateY(65px) scale(0.9) rotate(-1deg);
-  opacity: 0.6;
-  filter: blur(1.5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+/* When letter comes forward, softly dim only the flaps behind it (never blur or dim .envelope container) */
+.envelope-wrapper.letter-forward .envelope-back,
+.envelope-wrapper.letter-forward .envelope-left,
+.envelope-wrapper.letter-forward .envelope-right,
+.envelope-wrapper.letter-forward .envelope-bottom,
+.envelope-wrapper.letter-forward .envelope-flap {
+  opacity: 0.65;
+  transition: opacity 0.6s ease;
 }
 
 .envelope-back {
@@ -332,27 +332,33 @@ html, body {
   z-index: 1;
 }
 
-/* The Letter Card inside the envelope */
+/* The Letter Card inside the envelope - 100% crisp, no blur, high-DPI text */
 .letter-preview {
   position: absolute;
   top: 15px;
   left: 14px;
   right: 14px;
   height: 165px;
-  background: linear-gradient(150deg, #ffffff 0%, #fff4fa 60%, #ffe9f4 100%);
+  background: #ffffff;
+  background: linear-gradient(150deg, #ffffff 0%, #fff7fb 60%, #ffedf6 100%);
   color: #1a102a;
   border-radius: 12px;
   padding: 16px 14px;
   z-index: 2;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 42, 133, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border: 1.5px solid rgba(255, 42, 133, 0.35);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
   cursor: pointer;
-  transform: translateY(0) scale(1);
+  transform: translate3d(0, 0, 0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   transition: transform 0.75s cubic-bezier(0.25, 1, 0.5, 1), 
               box-shadow 0.75s ease;
   will-change: transform, box-shadow;
@@ -368,19 +374,21 @@ html, body {
 }
 
 .preview-title {
-  font-size: 1.02rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  color: #1a0f2e;
+  color: #160c26;
   margin-bottom: 5px;
   letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
 }
 
 .preview-text {
-  font-size: 0.8rem;
-  color: #4a455a;
+  font-size: 0.82rem;
+  color: #3d354a;
   font-weight: 500;
   line-height: 1.45;
   max-width: 95%;
+  -webkit-font-smoothing: antialiased;
 }
 
 .preview-footer {
@@ -409,16 +417,16 @@ html, body {
 
 /* Step 2: Letter smoothly pulling upward out of envelope */
 .envelope-wrapper.letter-pull .letter-preview {
-  transform: translateY(-165px) scale(1);
+  transform: translate3d(0, -170px, 0);
   z-index: 2;
   transition: transform 0.75s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Step 3: Letter comes forward in front of envelope & scales up */
+/* Step 3: Letter comes forward in front of envelope & scales up with crystal-clear sharpness */
 .envelope-wrapper.letter-forward .letter-preview {
-  transform: translateY(-30px) scale(1.22);
+  transform: translate3d(0, -35px, 60px) scale(1.1);
   z-index: 10;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 45px rgba(255, 42, 133, 0.45);
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.7), 0 0 45px rgba(255, 42, 133, 0.45);
   transition: transform 0.85s cubic-bezier(0.34, 1.45, 0.64, 1), 
               box-shadow 0.85s ease;
 }
