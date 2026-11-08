@@ -110,46 +110,96 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ==========================================================
-     2. Envelope Opening, Zoom & Fade, Unlock Scrolling
+     2. Envelope Opening, Letter Emerging, Zoom & Screen Exit
      ========================================================== */
   const heartSealBtn = document.getElementById('heartSealBtn');
   const envelopeWrapper = document.getElementById('envelopeWrapper');
   const envelopeScene = document.getElementById('envelopeScene');
+  const letterPreview = document.getElementById('letterPreview');
   const heroReveal = document.getElementById('heroReveal');
   const heroScrollPrompt = document.getElementById('heroScrollPrompt');
   const appContainer = document.getElementById('app');
 
   let isEnvelopeOpened = false;
+  let exitTimeoutId = null;
+
+  function executeSceneExit() {
+    if (exitTimeoutId) {
+      clearTimeout(exitTimeoutId);
+      exitTimeoutId = null;
+    }
+    if (!envelopeScene || envelopeScene.classList.contains('exit-screen')) return;
+
+    // Everything moves out from the screen
+    envelopeScene.classList.add('exit-screen');
+
+    // Confetti celebration
+    triggerPopperConfetti();
+
+    // Prepare hero reveal and unlock scrolling
+    heroReveal.classList.remove('hidden');
+    appContainer.classList.remove('scroll-locked');
+
+    setTimeout(() => {
+      heroReveal.classList.add('active');
+      triggerPopperConfetti();
+    }, 400);
+
+    setTimeout(() => {
+      envelopeScene.style.display = 'none';
+    }, 1100);
+  }
 
   function openEnvelope() {
     if (isEnvelopeOpened) return;
     isEnvelopeOpened = true;
 
-    // 1. Open envelope flap & elevate preview
-    envelopeWrapper.classList.add('open');
+    // 1. Break heart seal & flip flap open
+    envelopeScene.classList.add('scene-opening');
+    envelopeWrapper.classList.add('opening');
     triggerPopperConfetti();
 
-    // 2. Zoom and fade out the envelope
+    // 2. Letter smoothly pulls upward out of the envelope pocket
     setTimeout(() => {
-      envelopeScene.classList.add('fade-out');
+      envelopeWrapper.classList.add('letter-pull');
+    }, 450);
 
-      setTimeout(() => {
-        envelopeScene.style.display = 'none';
-        heroReveal.classList.remove('hidden');
-
-        // Unlock page scrolling so user can scroll to remaining slides!
-        appContainer.classList.remove('scroll-locked');
-
-        requestAnimationFrame(() => {
-          heroReveal.classList.add('active');
-          triggerPopperConfetti();
+    // 3. Letter jumps forward in front of envelope & scales up with spring bounce
+    setTimeout(() => {
+      envelopeWrapper.classList.add('letter-forward');
+      
+      // Sparkle confetti burst as letter comes forward
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 35,
+          spread: 60,
+          origin: { y: 0.55 },
+          colors: ['#ff2a85', '#ff5ca1', '#ffd700', '#ffffff']
         });
-      }, 700);
-    }, 800);
+      }
+    }, 1200);
+
+    // 4. Letter stays forward for a few seconds (3s), then everything moves out from screen
+    exitTimeoutId = setTimeout(() => {
+      executeSceneExit();
+    }, 4200);
+
+    // Allow user to tap the forward letter card to proceed immediately if desired
+    if (letterPreview) {
+      letterPreview.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (envelopeWrapper.classList.contains('letter-forward')) {
+          executeSceneExit();
+        }
+      });
+    }
   }
 
   if (heartSealBtn) {
-    heartSealBtn.addEventListener('click', openEnvelope);
+    heartSealBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openEnvelope();
+    });
   }
   if (envelopeWrapper) {
     envelopeWrapper.addEventListener('click', openEnvelope);

@@ -233,6 +233,7 @@ html, body {
 .slide-envelope {
   padding: 0;
   background: #090610;
+  overflow: hidden;
 }
 
 .envelope-scene {
@@ -243,18 +244,29 @@ html, body {
   width: 100%;
   height: 100%;
   padding: 24px;
-  transition: opacity 0.8s var(--transition-smooth), transform 0.8s var(--transition-smooth);
+  position: relative;
+  z-index: 5;
+  transition: transform 1s cubic-bezier(0.4, 0, 0.1, 1), opacity 0.8s ease;
+  will-change: transform, opacity;
 }
 
-.envelope-scene.fade-out {
+/* When exiting the screen */
+.envelope-scene.exit-screen {
   opacity: 0;
-  transform: scale(1.4);
+  transform: translateY(-115vh) scale(0.9) rotate(-3deg);
   pointer-events: none;
 }
 
 .envelope-hint {
   text-align: center;
   margin-bottom: 30px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.envelope-scene.scene-opening .envelope-hint {
+  opacity: 0;
+  transform: translateY(-15px);
+  pointer-events: none;
 }
 
 .pill-badge {
@@ -279,10 +291,11 @@ html, body {
 /* Realistic 3D Envelope */
 .envelope-wrapper {
   position: relative;
-  width: 290px;
+  width: 295px;
   height: 195px;
-  perspective: 1000px;
+  perspective: 1200px;
   cursor: pointer;
+  transition: transform 0.6s var(--transition-smooth);
 }
 
 .envelope {
@@ -293,7 +306,18 @@ html, body {
   border-radius: 12px;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 42, 133, 0.2);
   transform-style: preserve-3d;
-  transition: transform 0.6s var(--transition-smooth);
+  transition: transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              opacity 0.85s ease, 
+              filter 0.85s ease,
+              box-shadow 0.85s ease;
+}
+
+/* When letter comes forward, envelope recedes into background */
+.envelope-wrapper.letter-forward .envelope {
+  transform: translateY(65px) scale(0.9) rotate(-1deg);
+  opacity: 0.6;
+  filter: blur(1.5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .envelope-back {
@@ -308,44 +332,95 @@ html, body {
   z-index: 1;
 }
 
+/* The Letter Card inside the envelope */
 .letter-preview {
   position: absolute;
   top: 15px;
-  left: 15px;
-  right: 15px;
-  height: 140px;
-  background: #ffffff;
-  color: #1a1a2e;
-  border-radius: 8px;
-  padding: 16px;
+  left: 14px;
+  right: 14px;
+  height: 165px;
+  background: linear-gradient(150deg, #ffffff 0%, #fff4fa 60%, #ffe9f4 100%);
+  color: #1a102a;
+  border-radius: 12px;
+  padding: 16px 14px;
   z-index: 2;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  transition: transform 0.6s var(--transition-smooth);
+  border: 1px solid rgba(255, 42, 133, 0.3);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
+  cursor: pointer;
+  transform: translateY(0) scale(1);
+  transition: transform 0.75s cubic-bezier(0.25, 1, 0.5, 1), 
+              box-shadow 0.75s ease;
+  will-change: transform, box-shadow;
 }
 
 .preview-tag {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #ff2a85;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
+}
+
+.preview-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #1a0f2e;
+  margin-bottom: 5px;
+  letter-spacing: -0.01em;
 }
 
 .preview-text {
-  font-size: 0.85rem;
-  color: #4a5568;
+  font-size: 0.8rem;
+  color: #4a455a;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.45;
+  max-width: 95%;
 }
 
-.envelope-wrapper.open .letter-preview {
-  transform: translateY(-50px);
+.preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 42, 133, 0.25);
+}
+
+.preview-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ff2a85;
+}
+
+.preview-tap-hint {
+  font-size: 0.65rem;
+  color: #8b809a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  animation: pulse-soft 1.5s infinite ease-in-out;
+}
+
+/* Step 2: Letter smoothly pulling upward out of envelope */
+.envelope-wrapper.letter-pull .letter-preview {
+  transform: translateY(-165px) scale(1);
+  z-index: 2;
+  transition: transform 0.75s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Step 3: Letter comes forward in front of envelope & scales up */
+.envelope-wrapper.letter-forward .letter-preview {
+  transform: translateY(-30px) scale(1.22);
+  z-index: 10;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 45px rgba(255, 42, 133, 0.45);
+  transition: transform 0.85s cubic-bezier(0.34, 1.45, 0.64, 1), 
+              box-shadow 0.85s ease;
 }
 
 /* Envelope Flaps */
@@ -357,7 +432,7 @@ html, body {
   height: 0;
   border-top: 97.5px solid transparent;
   border-bottom: 97.5px solid transparent;
-  border-left: 145px solid #281541;
+  border-left: 147.5px solid #281541;
   border-radius: 12px 0 0 12px;
   z-index: 3;
 }
@@ -370,7 +445,7 @@ html, body {
   height: 0;
   border-top: 97.5px solid transparent;
   border-bottom: 97.5px solid transparent;
-  border-right: 145px solid #26133e;
+  border-right: 147.5px solid #26133e;
   border-radius: 0 12px 12px 0;
   z-index: 3;
 }
@@ -381,8 +456,8 @@ html, body {
   left: 0;
   width: 0;
   height: 0;
-  border-left: 145px solid transparent;
-  border-right: 145px solid transparent;
+  border-left: 147.5px solid transparent;
+  border-right: 147.5px solid transparent;
   border-bottom: 110px solid #321852;
   border-radius: 0 0 12px 12px;
   z-index: 4;
@@ -394,15 +469,18 @@ html, body {
   left: 0;
   width: 0;
   height: 0;
-  border-left: 145px solid transparent;
-  border-right: 145px solid transparent;
+  border-left: 147.5px solid transparent;
+  border-right: 147.5px solid transparent;
   border-top: 115px solid #3c1e62;
   transform-origin: top;
-  transition: transform 0.7s var(--transition-smooth), z-index 0.2s 0.2s;
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.15s 0.25s;
   z-index: 5;
   border-radius: 12px 12px 0 0;
 }
 
+.envelope-wrapper.opening .envelope-flap,
+.envelope-wrapper.letter-pull .envelope-flap,
+.envelope-wrapper.letter-forward .envelope-flap,
 .envelope-wrapper.open .envelope-flap {
   transform: rotateX(180deg);
   z-index: 1;
@@ -426,7 +504,7 @@ html, body {
   cursor: pointer;
   z-index: 6;
   box-shadow: 0 8px 25px rgba(255, 42, 133, 0.6);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease;
 }
 
 .heart-seal-btn:active {
@@ -462,10 +540,10 @@ html, body {
   100% { transform: scale(1.8); opacity: 0; }
 }
 
+.envelope-wrapper.opening .heart-seal-btn,
 .envelope-wrapper.open .heart-seal-btn {
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.3);
-  transition: all 0.4s ease;
   pointer-events: none;
 }
 
